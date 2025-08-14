@@ -1,0 +1,18 @@
+type User {
+  id: ID!
+  isBlacklistedByUSDT: Boolean!
+  isBlacklistedByUSDC: Boolean!
+}
+
+# Singleton; use id = "GLOBAL"
+type GlobalStats {
+  id: ID!
+  totalUsers: BigInt!
+  totalBlacklistedUSDT: BigInt!
+  totalBlacklistedUSDC: BigInt!
+  totalBlacklistEventsUSDT: BigInt!
+  totalUnblacklistEventsUSDT: BigInt!
+  totalBlacklistEventsUSDC: BigInt!
+  totalUnblacklistEventsUSDC: BigInt!
+  totalDestroyedBlackFundsUSDT: BigInt!
+}

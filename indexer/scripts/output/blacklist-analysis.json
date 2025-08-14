@@ -1,0 +1,148 @@
+{
+  "asOf": "2025-08-14T16:50:00.205Z",
+  "totals": {
+    "usdt": {
+      "raw": "833783787156256",
+      "formatted": "833,783,787.156256",
+      "formattedPretty": "833,783,787.15",
+      "decimals": 6,
+      "token": "USDT"
+    },
+    "usdc": {
+      "raw": "109737458510552",
+      "formatted": "109,737,458.510552",
+      "formattedPretty": "109,737,458.51",
+      "decimals": 6,
+      "token": "USDC"
+    },
+    "combinedRaw": "943521245666808",
+    "combinedFormatted": "833,783,787.156256 (USDT) + 109,737,458.510552 (USDC)",
+    "combinedFormattedPretty": "833,783,787.15 (USDT) + 109,737,458.51 (USDC)"
+  },
+  "top10": {
+    "usdt": [
+      {
+        "account": "0x1298500214c99CC9C844c2d99d741B44A869e427",
+        "balanceRaw": "50251106829057",
+        "balance": "50,251,106.829057",
+        "balancePretty": "50,251,106.82"
+      },
+      {
+        "account": "0xF88f8eC6b98cad9cE25C9c8FE1387B351F382b09",
+        "balanceRaw": "30000040045829",
+        "balance": "30,000,040.045829",
+        "balancePretty": "30,000,040.04"
+      },
+      {
+        "account": "0xbdD32B0e59F253f37eC97dA72c421d8da0e1Fb1e",
+        "balanceRaw": "21779062550010",
+        "balance": "21,779,062.55001",
+        "balancePretty": "21,779,062.55"
+      },
+      {
+        "account": "0xFeCc47AB11a44c09D9Cc7289eeB3B9A8abB9Ca16",
+        "balanceRaw": "21692098050000",
+        "balance": "21,692,098.05",
+        "balancePretty": "21,692,098.05"
+      },
+      {
+        "account": "0x3e1b373f18110bD7986b5CB6826300F5f3Fd87b0",
+        "balanceRaw": "20935010000000",
+        "balance": "20,935,010",
+        "balancePretty": "20,935,010"
+      },
+      {
+        "account": "0x44c9503188827034377353a9F6d876Eea15933C9",
+        "balanceRaw": "20010840041132",
+        "balance": "20,010,840.041132",
+        "balancePretty": "20,010,840.04"
+      },
+      {
+        "account": "0xe92057F579aBD78E65E20C3D4FC3994aA7fe1604",
+        "balanceRaw": "18714924926918",
+        "balance": "18,714,924.926918",
+        "balancePretty": "18,714,924.92"
+      },
+      {
+        "account": "0x186E6139cd55902fAa3d70b4cd866E7237d2F6eD",
+        "balanceRaw": "17727918373062",
+        "balance": "17,727,918.373062",
+        "balancePretty": "17,727,918.37"
+      },
+      {
+        "account": "0x3b76A3699b563Ad1aF98aD581714c72315c83607",
+        "balanceRaw": "16483179747189",
+        "balance": "16,483,179.747189",
+        "balancePretty": "16,483,179.74"
+      },
+      {
+        "account": "0x4cbeB09CAA4dDDDe613cEdfE2f73a92f07FC858F",
+        "balanceRaw": "14000000000000",
+        "balance": "14,000,000",
+        "balancePretty": "14,000,000"
+      }
+    ],
+    "usdc": [
+      {
+        "account": "0xefEeF8E968a0dB92781ac7B3B7c821909eF10c88",
+        "balanceRaw": "30138618000000",
+        "balance": "30,138,618",
+        "balancePretty": "30,138,618"
+      },
+      {
+        "account": "0x027F1571ACA57354223276722DC7B572A5b05cD8",
+        "balanceRaw": "27653475000000",
+        "balance": "27,653,475",
+        "balancePretty": "27,653,475"
+      },
+      {
+        "account": "0x48BeAD89e696Ee93B04913cB0006f35adB844537",
+        "balanceRaw": "5496936000000",
+        "balance": "5,496,936",
+        "balancePretty": "5,496,936"
+      },
+      {
+        "account": "0x290B6eBbdca04eE984fB8617E1b92deea23052E3",
+        "balanceRaw": "4103255553798",
+        "balance": "4,103,255.553798",
+        "balancePretty": "4,103,255.55"
+      },
+      {
+        "account": "0xe1724299CC4DA9776a2c04723d9fD3d7c4AFa27e",
+        "balanceRaw": "3086853431836",
+        "balance": "3,086,853.431836",
+        "balancePretty": "3,086,853.43"
+      },
+      {
+        "account": "0xBE10A20daf62E499d73b3E2009612A54ce4439ea",
+        "balanceRaw": "2997180013031",
+        "balance": "2,997,180.013031",
+        "balancePretty": "2,997,180.01"
+      },
+      {
+        "account": "0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc",
+        "balanceRaw": "2711280171380",
+        "balance": "2,711,280.17138",
+        "balancePretty": "2,711,280.17"
+      },
+      {
+        "account": "0xD160Ab0327B307a7b23436242198Dc02f850CB7C",
+        "balanceRaw": "2459911749266",
+        "balance": "2,459,911.749266",
+        "balancePretty": "2,459,911.74"
+      },
+      {
+        "account": "0xbc498da9268eb52a26BA49319ddcDeDccB005D11",
+        "balanceRaw": "2000779186487",
+        "balance": "2,000,779.186487",
+        "balancePretty": "2,000,779.18"
+      },
+      {
+        "account": "0x02c7861D81D95827a0453cE0De50794102DC6365",
+        "balanceRaw": "1755099434398",
+        "balance": "1,755,099.434398",
+        "balancePretty": "1,755,099.43"
+      }
+    ]
+  }
+}
