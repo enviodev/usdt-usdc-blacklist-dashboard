@@ -2,6 +2,8 @@ type Stats = {
     totalBlacklistedUSDT: number;
     totalBlacklistedUSDC: number;
     totalDestroyedBlackFundsUSDT: string;
+    totalBlacklistedUSDCDollarAmount?: string;
+    totalBlacklistedUSDTDollarAmount?: string;
 };
 
 export type Row = { index: number; account: string; balance?: string; balanceRaw?: string };
@@ -18,6 +20,8 @@ query TheListData(
     totalBlacklistedUSDT
     totalBlacklistedUSDC
     totalDestroyedBlackFundsUSDT
+    totalBlacklistedUSDCDollarAmount
+    totalBlacklistedUSDTDollarAmount
   }
   User(where: {isBlacklistedByUSDT: {_eq: true}}, limit: $limit, offset: $offsetUsdt, order_by: $orderByUsdt) {
     id
@@ -94,7 +98,12 @@ export async function fetchBlacklistData(opts?: {
             totalBlacklistedUSDT: Number(g?.totalBlacklistedUSDT ?? 0),
             totalBlacklistedUSDC: Number(g?.totalBlacklistedUSDC ?? 0),
             totalDestroyedBlackFundsUSDT: String(g?.totalDestroyedBlackFundsUSDT ?? '0'),
+            totalBlacklistedUSDCDollarAmount: formatUnits(String(g?.totalBlacklistedUSDCDollarAmount ?? '0'), 6),
+            totalBlacklistedUSDTDollarAmount: formatUnits(String(g?.totalBlacklistedUSDTDollarAmount ?? '0'), 6),
         };
+
+        console.log('[fetchBlacklistData] GlobalStats_by_pk', g);
+        console.log('[fetchBlacklistData] computed stats', stats);
 
         const usdt: Row[] = (json.data.User as Array<{ id: string; usdtBalance: string }>)?.map((u, i) => {
             const raw = u.usdtBalance;

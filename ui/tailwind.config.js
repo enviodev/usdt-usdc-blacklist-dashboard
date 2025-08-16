@@ -14,6 +14,8 @@ module.exports = {
         "terminal-bg": "#282a36",
         "terminal-text": "#ffffff",
         "terminal-warning": "#ebedad",
+        "terminal-value": "#c7a9fc",
+        "terminal-blue": "#a4ecf9",
       },
       fontFamily: {
         mono: [

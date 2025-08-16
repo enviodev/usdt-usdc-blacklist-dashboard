@@ -5,6 +5,8 @@ type Stats = {
     totalBlacklistedUSDT: number;
     totalBlacklistedUSDC: number;
     totalDestroyedBlackFundsUSDT: string;
+    totalBlacklistedUSDCDollarAmount?: string;
+    totalBlacklistedUSDTDollarAmount?: string;
 };
 
 type Props = {
@@ -62,17 +64,22 @@ export default function PageContent({ selectedTab, data, currentPage, sort }: Pr
                         <tr className="divide-x divide-white">
                             <td className="py-1 px-2 text-terminal-dim">0</td>
                             <td className="py-1 px-2 text-terminal-text">USDT total</td>
-                            <td className="py-1 px-2 text-terminal-accent">{data.stats.totalBlacklistedUSDT.toLocaleString()}</td>
+                            <td className="py-1 px-2 text-terminal-value">${Number(data.stats.totalBlacklistedUSDTDollarAmount ?? '0').toLocaleString()}</td>
                         </tr>
                         <tr className="divide-x divide-white">
                             <td className="py-1 px-2 text-terminal-dim">1</td>
                             <td className="py-1 px-2 text-terminal-text">USDC total</td>
-                            <td className="py-1 px-2 text-terminal-accent">{data.stats.totalBlacklistedUSDC.toLocaleString()}</td>
+                            <td className="py-1 px-2 text-terminal-value">${Number(data.stats.totalBlacklistedUSDCDollarAmount ?? '0').toLocaleString()}</td>
                         </tr>
                         <tr className="divide-x divide-white">
-                            <td className="py-1 px-2 text-terminal-dim">2</td>
-                            <td className="py-1 px-2 text-terminal-text">Combined</td>
-                            <td className="py-1 px-2 text-terminal-accent">{`${data.stats.totalBlacklistedUSDT.toLocaleString()} + ${data.stats.totalBlacklistedUSDC.toLocaleString()}`}</td>
+                            <td className="py-1 px-2 text-terminal-dim"></td>
+                            <td className="py-1 px-2 text-terminal-text w-[50%]"></td>
+                            <td className="py-1 px-2 text-terminal-value border-t border-white">${
+                                (
+                                    Number(data.stats.totalBlacklistedUSDTDollarAmount ?? '0') +
+                                    Number(data.stats.totalBlacklistedUSDCDollarAmount ?? '0')
+                                ).toLocaleString()
+                            }</td>
                         </tr>
                     </tbody>
                 </table>
