@@ -4,6 +4,8 @@ type User {
   isBlacklistedByUSDC: Boolean!
   usdtBalance: BigInt!
   usdcBalance: BigInt!
+  blacklistedAtUSDT: BigInt
+  blacklistedAtUSDC: BigInt
 }
 
 # Singleton; use id = "GLOBAL"
@@ -17,4 +19,6 @@ type GlobalStats {
   totalBlacklistEventsUSDC: BigInt!
   totalUnblacklistEventsUSDC: BigInt!
   totalDestroyedBlackFundsUSDT: BigInt!
+  totalBlacklistedUSDTDollarAmount: BigInt!
+  totalBlacklistedUSDCDollarAmount: BigInt!
 }

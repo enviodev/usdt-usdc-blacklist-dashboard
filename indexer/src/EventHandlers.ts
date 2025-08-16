@@ -27,6 +27,8 @@ async function getOrCreateGlobalStats(context: any): Promise<GlobalStats> {
     totalBlacklistEventsUSDC: 0n,
     totalUnblacklistEventsUSDC: 0n,
     totalDestroyedBlackFundsUSDT: 0n,
+    totalBlacklistedUSDTDollarAmount: 0n,
+    totalBlacklistedUSDCDollarAmount: 0n,
   };
   context.GlobalStats.set(created);
   return created;
@@ -43,6 +45,8 @@ async function getOrCreateUser(context: any, address: string): Promise<{ user: U
     isBlacklistedByUSDC: false,
     usdtBalance: 0n,
     usdcBalance: 0n,
+    blacklistedAtUSDT: 0n,
+    blacklistedAtUSDC: 0n
   };
   context.User.set(created);
   return { user: created, isNew: true };
@@ -66,6 +70,7 @@ FiatTokenProxy.Blacklisted.handler(async ({ event, context }) => {
     ...user,
     isBlacklistedByUSDC: true,
     usdcBalance,
+    blacklistedAtUSDC: BigInt(event.block.timestamp),
   };
   context.User.set(updatedUser);
 
@@ -75,6 +80,7 @@ FiatTokenProxy.Blacklisted.handler(async ({ event, context }) => {
     totalUsers: isNew ? stats.totalUsers + 1n : stats.totalUsers,
     totalBlacklistEventsUSDC: stats.totalBlacklistEventsUSDC + 1n,
     totalBlacklistedUSDC: becameBlacklisted ? stats.totalBlacklistedUSDC + 1n : stats.totalBlacklistedUSDC,
+    totalBlacklistedUSDCDollarAmount: stats.totalBlacklistedUSDCDollarAmount + (becameBlacklisted ? usdcBalance : 0n),
   };
   context.GlobalStats.set(updatedStats);
 });
@@ -87,6 +93,7 @@ FiatTokenProxy.UnBlacklisted.handler(async ({ event, context }) => {
   const updatedUser: User = {
     ...user,
     isBlacklistedByUSDC: false,
+    blacklistedAtUSDC: user.blacklistedAtUSDC,
   };
   context.User.set(updatedUser);
 
@@ -95,6 +102,7 @@ FiatTokenProxy.UnBlacklisted.handler(async ({ event, context }) => {
     totalUsers: isNew ? stats.totalUsers + 1n : stats.totalUsers,
     totalUnblacklistEventsUSDC: stats.totalUnblacklistEventsUSDC + 1n,
     totalBlacklistedUSDC: wasBlacklisted ? stats.totalBlacklistedUSDC - 1n : stats.totalBlacklistedUSDC,
+    totalBlacklistedUSDCDollarAmount: wasBlacklisted ? (stats.totalBlacklistedUSDCDollarAmount - user.usdcBalance) : stats.totalBlacklistedUSDCDollarAmount,
   };
   context.GlobalStats.set(updatedStats);
 });
@@ -116,6 +124,7 @@ TetherToken.AddedBlackList.handler(async ({ event, context }) => {
     ...user,
     isBlacklistedByUSDT: true,
     usdtBalance,
+    blacklistedAtUSDT: BigInt(event.block.timestamp),
   };
   context.User.set(updatedUser);
 
@@ -125,6 +134,7 @@ TetherToken.AddedBlackList.handler(async ({ event, context }) => {
     totalUsers: isNew ? stats.totalUsers + 1n : stats.totalUsers,
     totalBlacklistEventsUSDT: stats.totalBlacklistEventsUSDT + 1n,
     totalBlacklistedUSDT: becameBlacklisted ? stats.totalBlacklistedUSDT + 1n : stats.totalBlacklistedUSDT,
+    totalBlacklistedUSDTDollarAmount: stats.totalBlacklistedUSDTDollarAmount + (becameBlacklisted ? usdtBalance : 0n),
   };
   context.GlobalStats.set(updatedStats);
 });
@@ -146,6 +156,7 @@ TetherToken.RemovedBlackList.handler(async ({ event, context }) => {
   const updatedUser: User = {
     ...user,
     isBlacklistedByUSDT: false,
+    blacklistedAtUSDT: user.blacklistedAtUSDT,
   };
   context.User.set(updatedUser);
 
@@ -154,6 +165,7 @@ TetherToken.RemovedBlackList.handler(async ({ event, context }) => {
     totalUsers: isNew ? stats.totalUsers + 1n : stats.totalUsers,
     totalUnblacklistEventsUSDT: stats.totalUnblacklistEventsUSDT + 1n,
     totalBlacklistedUSDT: wasBlacklisted ? stats.totalBlacklistedUSDT - 1n : stats.totalBlacklistedUSDT,
+    totalBlacklistedUSDTDollarAmount: wasBlacklisted ? (stats.totalBlacklistedUSDTDollarAmount - user.usdtBalance) : stats.totalBlacklistedUSDTDollarAmount,
   };
   context.GlobalStats.set(updatedStats);
 });
