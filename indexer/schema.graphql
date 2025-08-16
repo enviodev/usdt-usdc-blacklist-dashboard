@@ -2,6 +2,8 @@ type User {
   id: ID!
   isBlacklistedByUSDT: Boolean!
   isBlacklistedByUSDC: Boolean!
+  usdtBalance: BigInt!
+  usdcBalance: BigInt!
 }
 
 # Singleton; use id = "GLOBAL"

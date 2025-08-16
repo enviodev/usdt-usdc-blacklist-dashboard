@@ -7,8 +7,49 @@ import {
   User,
   GlobalStats,
 } from "generated";
+import { S, experimental_createEffect } from "envio";
 
 const GLOBAL_ID = "GLOBAL";
+
+export const getERC20Balance = experimental_createEffect(
+  {
+    name: "getERC20Balance",
+    input: {
+      tokenAddress: S.string,
+      userAddress: S.string,
+    },
+    output: S.string,
+    cache: true,
+  },
+  async ({ input }) => {
+    const { createPublicClient, http } = await import("viem");
+    const { mainnet } = await import("viem/chains");
+
+    const client = createPublicClient({
+      chain: mainnet,
+      transport: http((process.env.RPC_URL || undefined), { batch: true }),
+    });
+
+    const erc20Abi = [
+      {
+        name: "balanceOf",
+        type: "function",
+        stateMutability: "view",
+        inputs: [{ name: "account", type: "address" }],
+        outputs: [{ name: "balance", type: "uint256" }],
+      },
+    ] as const;
+
+    const balance = await client.readContract({
+      address: input.tokenAddress as any,
+      abi: erc20Abi,
+      functionName: "balanceOf",
+      args: [input.userAddress as any],
+    });
+
+    return balance.toString();
+  }
+);
 
 async function getOrCreateGlobalStats(context: any): Promise<GlobalStats> {
   const existing = await context.GlobalStats.get(GLOBAL_ID);
@@ -38,6 +79,8 @@ async function getOrCreateUser(context: any, address: string): Promise<{ user: U
     id: userId,
     isBlacklistedByUSDT: false,
     isBlacklistedByUSDC: false,
+    usdtBalance: 0n,
+    usdcBalance: 0n,
   };
   context.User.set(created);
   return { user: created, isNew: true };
@@ -48,9 +91,19 @@ FiatTokenProxy.Blacklisted.handler(async ({ event, context }) => {
   const stats = await getOrCreateGlobalStats(context);
   const { user, isNew } = await getOrCreateUser(context, event.params._account);
 
+  let usdcBalance = user.usdcBalance;
+  if (!context.isPreload) {
+    const usdc = await context.effect(getERC20Balance, {
+      tokenAddress: event.srcAddress,
+      userAddress: event.params._account,
+    });
+    usdcBalance = BigInt(usdc);
+  }
+
   const updatedUser: User = {
     ...user,
     isBlacklistedByUSDC: true,
+    usdcBalance,
   };
   context.User.set(updatedUser);
 
@@ -88,9 +141,19 @@ TetherToken.AddedBlackList.handler(async ({ event, context }) => {
   const stats = await getOrCreateGlobalStats(context);
   const { user, isNew } = await getOrCreateUser(context, event.params._user);
 
+  let usdtBalance = user.usdtBalance;
+  if (!context.isPreload) {
+    const usdt = await context.effect(getERC20Balance, {
+      tokenAddress: event.srcAddress,
+      userAddress: event.params._user,
+    });
+    usdtBalance = BigInt(usdt);
+  }
+
   const updatedUser: User = {
     ...user,
     isBlacklistedByUSDT: true,
+    usdtBalance,
   };
   context.User.set(updatedUser);
 
