@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+/* Subtle scanlines for terminal vibe */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.02),
+    rgba(255, 255, 255, 0.02) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.terminal-title {
+  @apply text-terminal-text;
+}
+
+.kbd {
+  @apply rounded border border-terminal-border bg-black/30 px-1 py-0.5 text-xs text-terminal-dim;
+}
+
+.terminal-table {
+  border-collapse: collapse;
+}
