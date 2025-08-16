@@ -28,7 +28,7 @@ export default function PageContent({ selectedTab, data, currentPage, sort }: Pr
     const pageHref = (page: number) => `${isUSDT ? '/USDT' : '/USDC'}?page=${page}&sort=${sort}`;
     const sortHref = (nextSort: 'asc' | 'desc') => `${isUSDT ? '/USDT' : '/USDC'}?page=1&sort=${nextSort}`;
     return (
-        <main className="mx-auto max-w-6xl p-4 md:p-8 space-y-2 font-mono">
+        <main className="mx-auto max-w-4xl p-4 md:p-8 space-y-2 font-mono">
             <header className="p-2 md:p-6">
                 <div className="flex items-center justify-between">
                     <h1 className="terminal-title text-xl md:text-2xl">the list</h1>
