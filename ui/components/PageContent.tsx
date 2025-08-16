@@ -14,6 +14,7 @@ type Props = {
     data: { stats: Stats; usdt: TableRow[]; usdc: TableRow[]; pageCountUsdt: number; pageCountUsdc: number };
     currentPage: number;
     sort: 'asc' | 'desc';
+    sortBy?: 'balance' | 'date';
 };
 
 function formatCommas(numericString: string): string {
@@ -25,9 +26,9 @@ function formatCommas(numericString: string): string {
     return sign + withCommas;
 }
 
-export default function PageContent({ selectedTab, data, currentPage, sort }: Props) {
+export default function PageContent({ selectedTab, data, currentPage, sort, sortBy = 'balance' }: Props) {
     const isUSDT = selectedTab === 'usdt';
-    const pageHref = (page: number) => `${isUSDT ? '/USDT' : '/USDC'}?page=${page}&sort=${sort}`;
+    const pageHref = (page: number) => `${isUSDT ? '/USDT' : '/USDC'}?page=${page}&sort=${sort}${sortBy ? `&sortBy=${sortBy}` : ''}`;
     const sortHref = (nextSort: 'asc' | 'desc') => `${isUSDT ? '/USDT' : '/USDC'}?page=1&sort=${nextSort}`;
     return (
         <main className="mx-auto max-w-4xl p-2 md:p-6 space-y-1 font-mono">
@@ -101,9 +102,9 @@ export default function PageContent({ selectedTab, data, currentPage, sort }: Pr
                     </Link>
                 </div>
                 {isUSDT ? (
-                    <TerminalTable rows={data.usdt} currentPage={currentPage} pageCount={data.pageCountUsdt} pageHref={pageHref} sort={sort} sortHref={sortHref} />
+                    <TerminalTable rows={data.usdt} currentPage={currentPage} pageCount={data.pageCountUsdt} pageHref={pageHref} sort={sort} sortHref={sortHref} dateSortHref={(next) => `/USDT?page=1&sort=${next}&sortBy=date`} />
                 ) : (
-                    <TerminalTable rows={data.usdc} currentPage={currentPage} pageCount={data.pageCountUsdc} pageHref={pageHref} sort={sort} sortHref={sortHref} />
+                    <TerminalTable rows={data.usdc} currentPage={currentPage} pageCount={data.pageCountUsdc} pageHref={pageHref} sort={sort} sortHref={sortHref} dateSortHref={(next) => `/USDC?page=1&sort=${next}&sortBy=date`} />
                 )}
             </section>
             <footer className="p-2 text-center text-xs text-terminal-text">

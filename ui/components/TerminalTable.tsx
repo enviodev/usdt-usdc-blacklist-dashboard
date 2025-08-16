@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export type Row = { index: number; account: string; balance?: string; balanceRaw?: string };
+export type Row = { index: number; account: string; balance?: string; balanceRaw?: string; timestamp?: string };
 
 export function TerminalTable({
     rows,
@@ -9,6 +9,7 @@ export function TerminalTable({
     pageHref,
     sort,
     sortHref,
+    dateSortHref,
 }: {
     rows: Row[];
     currentPage: number;
@@ -16,6 +17,7 @@ export function TerminalTable({
     pageHref: (page: number) => string;
     sort: "asc" | "desc";
     sortHref: (nextSort: "asc" | "desc") => string;
+    dateSortHref?: (nextSort: "asc" | "desc") => string;
 }) {
     const nextSort = sort === "asc" ? "desc" : "asc";
     return (
@@ -26,6 +28,16 @@ export function TerminalTable({
                         <tr className="text-terminal-text divide-x divide-white border-b border-white">
                             <th className="py-1 px-2 w-20">(index)</th>
                             <th className="py-1 px-2 ">account</th>
+                            <th className="py-1 px-2 w-28">
+                                {dateSortHref ? (
+                                    <Link href={dateSortHref(nextSort)} className="inline-flex items-center gap-1">
+                                        <span>date</span>
+                                        <span className="text-terminal-text">{sort === "asc" ? "▲" : "▼"}</span>
+                                    </Link>
+                                ) : (
+                                    <span>date</span>
+                                )}
+                            </th>
                             <th className="py-1 px-2 w-40">
                                 <Link href={sortHref(nextSort)} className="inline-flex items-center gap-1">
                                     <span>balance</span>
@@ -43,6 +55,7 @@ export function TerminalTable({
                                         {r.account}
                                     </Link>
                                 </td>
+                                <td className="py-1 px-2 text-terminal-blue">{r.timestamp ?? ''}</td>
                                 <td className="py-1 px-2 text-terminal-warning">{r.balance != undefined ? "$" + r.balance : ""}</td>
                             </tr>
                         ))}

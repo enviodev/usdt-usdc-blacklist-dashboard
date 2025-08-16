@@ -6,7 +6,7 @@ type Stats = {
     totalBlacklistedUSDTDollarAmount?: string;
 };
 
-export type Row = { index: number; account: string; balance?: string; balanceRaw?: string };
+export type Row = { index: number; account: string; balance?: string; balanceRaw?: string; timestamp?: string };
 
 const QUERY = `#graphql
 query TheListData(
@@ -26,10 +26,12 @@ query TheListData(
   User(where: {isBlacklistedByUSDT: {_eq: true}}, limit: $limit, offset: $offsetUsdt, order_by: $orderByUsdt) {
     id
     usdtBalance
+    blacklistedAtUSDT
   }
   User2: User(where: {isBlacklistedByUSDC: {_eq: true}}, limit: $limit, offset: $offsetUsdc, order_by: $orderByUsdc) {
     id
     usdcBalance
+    blacklistedAtUSDC
   }
 }`;
 
@@ -57,12 +59,25 @@ function formatWithCommas(numericString: string): string {
     return sign + withCommas;
 }
 
+function formatEpochToDateString(epochSecondsLike: string | number | undefined): string {
+    if (!epochSecondsLike) return '';
+    const sec = Number(epochSecondsLike);
+    if (!Number.isFinite(sec)) return '';
+    const d = new Date(sec * 1000);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = String(d.getFullYear());
+    return `${dd}-${mm}-${yyyy}`;
+}
+
 export async function fetchBlacklistData(opts?: {
     pageUsdt?: number;
     pageUsdc?: number;
     pageSize?: number;
     sortUsdt?: 'asc' | 'desc';
     sortUsdc?: 'asc' | 'desc';
+    sortByUsdt?: 'balance' | 'date';
+    sortByUsdc?: 'balance' | 'date';
 }): Promise<{ stats: Stats; usdt: Row[]; usdc: Row[]; pageCountUsdt: number; pageCountUsdc: number; }> {
     try {
         const endpoint = getEndpoint();
@@ -71,6 +86,8 @@ export async function fetchBlacklistData(opts?: {
         const pageUsdc = Math.max(1, opts?.pageUsdc ?? 1);
         const sortUsdt = opts?.sortUsdt ?? 'desc';
         const sortUsdc = opts?.sortUsdc ?? 'desc';
+        const sortByUsdt = opts?.sortByUsdt ?? 'balance';
+        const sortByUsdc = opts?.sortByUsdc ?? 'balance';
         const resp = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -82,8 +99,8 @@ export async function fetchBlacklistData(opts?: {
                     limit: pageSize,
                     offsetUsdt: (pageUsdt - 1) * pageSize,
                     offsetUsdc: (pageUsdc - 1) * pageSize,
-                    orderByUsdt: [{ usdtBalance: sortUsdt }],
-                    orderByUsdc: [{ usdcBalance: sortUsdc }],
+                    orderByUsdt: sortByUsdt === 'date' ? [{ blacklistedAtUSDT: sortUsdt }] : [{ usdtBalance: sortUsdt }],
+                    orderByUsdc: sortByUsdc === 'date' ? [{ blacklistedAtUSDC: sortUsdc }] : [{ usdcBalance: sortUsdc }],
                 },
             }),
             cache: 'no-store',
@@ -105,7 +122,7 @@ export async function fetchBlacklistData(opts?: {
         console.log('[fetchBlacklistData] GlobalStats_by_pk', g);
         console.log('[fetchBlacklistData] computed stats', stats);
 
-        const usdt: Row[] = (json.data.User as Array<{ id: string; usdtBalance: string }>)?.map((u, i) => {
+        const usdt: Row[] = (json.data.User as Array<{ id: string; usdtBalance: string; blacklistedAtUSDT?: string }>)?.map((u, i) => {
             const raw = u.usdtBalance;
             const whole = formatUnits(raw, 6);
             return {
@@ -113,9 +130,10 @@ export async function fetchBlacklistData(opts?: {
                 account: u.id,
                 balance: formatWithCommas(whole),
                 balanceRaw: whole,
+                timestamp: formatEpochToDateString(u.blacklistedAtUSDT),
             };
         }) ?? [];
-        const usdc: Row[] = (json.data.User2 as Array<{ id: string; usdcBalance: string }>)?.map((u, i) => {
+        const usdc: Row[] = (json.data.User2 as Array<{ id: string; usdcBalance: string; blacklistedAtUSDC?: string }>)?.map((u, i) => {
             const raw = u.usdcBalance;
             const whole = formatUnits(raw, 6);
             return {
@@ -123,6 +141,7 @@ export async function fetchBlacklistData(opts?: {
                 account: u.id,
                 balance: formatWithCommas(whole),
                 balanceRaw: whole,
+                timestamp: formatEpochToDateString(u.blacklistedAtUSDC),
             };
         }) ?? [];
         const pageCountUsdt = Math.max(1, Math.ceil(stats.totalBlacklistedUSDT / pageSize));
