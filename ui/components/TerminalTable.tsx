@@ -37,7 +37,7 @@ export function TerminalTable({
                     <tbody>
                         {rows.map((r) => (
                             <tr key={r.index} className="divide-x divide-white">
-                                <td className="py-1 px-2 text-terminal-dim">{r.index}</td>
+                                <td className="py-1 px-2 text-terminal-dim ">{r.index}</td>
                                 <td className="py-1 px-2 text-terminal-accent w-[26ch] max-w-[26ch] truncate">
                                     <Link href={`https://etherscan.io/address/${r.account}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-80">
                                         {r.account}
