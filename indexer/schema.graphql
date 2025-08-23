@@ -22,3 +22,15 @@ type GlobalStats {
   totalBlacklistedUSDTDollarAmount: BigInt!
   totalBlacklistedUSDCDollarAmount: BigInt!
 }
+
+# Snapshot of aggregate totals at a specific block/time, recorded on every
+# blacklist/un-blacklist event from USDT and USDC contracts
+type BlacklistSnapshot {
+  id: ID!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  totalBlacklistedUSDT: BigInt!
+  totalBlacklistedUSDC: BigInt!
+  totalBlacklistedUSDTDollarAmount: BigInt!
+  totalBlacklistedUSDCDollarAmount: BigInt!
+}

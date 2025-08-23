@@ -6,6 +6,7 @@ import {
   TetherToken,
   User,
   GlobalStats,
+  BlacklistSnapshot,
 } from "generated";
 import { getERC20Balance } from "./effects";
 
@@ -83,6 +84,17 @@ FiatTokenProxy.Blacklisted.handler(async ({ event, context }) => {
     totalBlacklistedUSDCDollarAmount: stats.totalBlacklistedUSDCDollarAmount + (becameBlacklisted ? usdcBalance : 0n),
   };
   context.GlobalStats.set(updatedStats);
+  // Write snapshot
+  const snapUSDC: BlacklistSnapshot = {
+    id: `${event.block.number.toString()}-${event.logIndex.toString()}-usdc` as any,
+    blockNumber: BigInt(event.block.number),
+    timestamp: BigInt(event.block.timestamp),
+    totalBlacklistedUSDT: updatedStats.totalBlacklistedUSDT,
+    totalBlacklistedUSDC: updatedStats.totalBlacklistedUSDC,
+    totalBlacklistedUSDTDollarAmount: updatedStats.totalBlacklistedUSDTDollarAmount,
+    totalBlacklistedUSDCDollarAmount: updatedStats.totalBlacklistedUSDCDollarAmount,
+  };
+  context.BlacklistSnapshot.set(snapUSDC);
 });
 
 FiatTokenProxy.UnBlacklisted.handler(async ({ event, context }) => {
@@ -105,6 +117,17 @@ FiatTokenProxy.UnBlacklisted.handler(async ({ event, context }) => {
     totalBlacklistedUSDCDollarAmount: wasBlacklisted ? (stats.totalBlacklistedUSDCDollarAmount - user.usdcBalance) : stats.totalBlacklistedUSDCDollarAmount,
   };
   context.GlobalStats.set(updatedStats);
+  // Write snapshot
+  const snapUSDCUn: BlacklistSnapshot = {
+    id: `${event.block.number.toString()}-${event.logIndex.toString()}-usdc-un` as any,
+    blockNumber: BigInt(event.block.number),
+    timestamp: BigInt(event.block.timestamp),
+    totalBlacklistedUSDT: updatedStats.totalBlacklistedUSDT,
+    totalBlacklistedUSDC: updatedStats.totalBlacklistedUSDC,
+    totalBlacklistedUSDTDollarAmount: updatedStats.totalBlacklistedUSDTDollarAmount,
+    totalBlacklistedUSDCDollarAmount: updatedStats.totalBlacklistedUSDCDollarAmount,
+  };
+  context.BlacklistSnapshot.set(snapUSDCUn);
 });
 
 TetherToken.AddedBlackList.handler(async ({ event, context }) => {
@@ -137,6 +160,17 @@ TetherToken.AddedBlackList.handler(async ({ event, context }) => {
     totalBlacklistedUSDTDollarAmount: stats.totalBlacklistedUSDTDollarAmount + (becameBlacklisted ? usdtBalance : 0n),
   };
   context.GlobalStats.set(updatedStats);
+  // Write snapshot
+  const snapUSDT: BlacklistSnapshot = {
+    id: `${event.block.number.toString()}-${event.logIndex.toString()}-usdt` as any,
+    blockNumber: BigInt(event.block.number),
+    timestamp: BigInt(event.block.timestamp),
+    totalBlacklistedUSDT: updatedStats.totalBlacklistedUSDT,
+    totalBlacklistedUSDC: updatedStats.totalBlacklistedUSDC,
+    totalBlacklistedUSDTDollarAmount: updatedStats.totalBlacklistedUSDTDollarAmount,
+    totalBlacklistedUSDCDollarAmount: updatedStats.totalBlacklistedUSDCDollarAmount,
+  };
+  context.BlacklistSnapshot.set(snapUSDT);
 });
 
 TetherToken.DestroyedBlackFunds.handler(async ({ event, context }) => {
@@ -146,6 +180,17 @@ TetherToken.DestroyedBlackFunds.handler(async ({ event, context }) => {
     totalDestroyedBlackFundsUSDT: stats.totalDestroyedBlackFundsUSDT + event.params._balance,
   };
   context.GlobalStats.set(updatedStats);
+  // Write snapshot
+  const snapUSDTUn: BlacklistSnapshot = {
+    id: `${event.block.number.toString()}-${event.logIndex.toString()}-usdt-un` as any,
+    blockNumber: BigInt(event.block.number),
+    timestamp: BigInt(event.block.timestamp),
+    totalBlacklistedUSDT: updatedStats.totalBlacklistedUSDT,
+    totalBlacklistedUSDC: updatedStats.totalBlacklistedUSDC,
+    totalBlacklistedUSDTDollarAmount: updatedStats.totalBlacklistedUSDTDollarAmount,
+    totalBlacklistedUSDCDollarAmount: updatedStats.totalBlacklistedUSDCDollarAmount,
+  };
+  context.BlacklistSnapshot.set(snapUSDTUn);
 });
 
 TetherToken.RemovedBlackList.handler(async ({ event, context }) => {
