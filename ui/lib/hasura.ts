@@ -7,6 +7,7 @@ type Stats = {
 };
 
 export type Row = { index: number; account: string; balance?: string; balanceRaw?: string; timestamp?: string };
+export type SeriesPoint = { date: string; value: number };
 
 const QUERY = `#graphql
 query TheListData(
@@ -63,6 +64,17 @@ function formatEpochToDateString(epochSecondsLike: string | number | undefined):
     if (!epochSecondsLike) return '';
     const sec = Number(epochSecondsLike);
     if (!Number.isFinite(sec)) return '';
+    const d = new Date(sec * 1000);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = String(d.getFullYear());
+    return `${dd}-${mm}-${yyyy}`;
+}
+
+function epochToYmd(epochSecondsLike: string | number | undefined): string | undefined {
+    if (!epochSecondsLike) return undefined;
+    const sec = Number(epochSecondsLike);
+    if (!Number.isFinite(sec)) return undefined;
     const d = new Date(sec * 1000);
     const dd = String(d.getDate()).padStart(2, '0');
     const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -157,6 +169,96 @@ export async function fetchBlacklistData(opts?: {
         };
         return { stats: empty, usdt: [], usdc: [], pageCountUsdt: 1, pageCountUsdc: 1 };
     }
+}
+
+// Build daily cumulative series for USDT/USDC balances based on blacklist timestamps
+export async function fetchCumulativeSeries(pageSize = 500): Promise<{ usdt: SeriesPoint[]; usdc: SeriesPoint[] }> {
+    const endpoint = getEndpoint();
+    const build = async (which: 'usdt' | 'usdc') => {
+        const isUsdt = which === 'usdt';
+        const query = `#graphql\nquery Page($limit:Int!,$offset:Int!){\n  ${isUsdt ? 'User(where:{isBlacklistedByUSDT:{_eq:true}},order_by:{blacklistedAtUSDT:asc},limit:$limit,offset:$offset){id usdtBalance blacklistedAtUSDT}' : 'User(where:{isBlacklistedByUSDC:{_eq:true}},order_by:{blacklistedAtUSDC:asc},limit:$limit,offset:$offset){id usdcBalance blacklistedAtUSDC}'}\n}`;
+        const dateToTotal = new Map<string, number>();
+        let offset = 0;
+        for (; ;) {
+            const resp = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, variables: { limit: pageSize, offset } }),
+                cache: 'no-store',
+            });
+            if (!resp.ok) throw new Error(`GraphQL error ${resp.status}`);
+            const json = await resp.json();
+            const arr: Array<any> = json.data.User ?? [];
+            if (arr.length === 0) break;
+            for (const u of arr) {
+                const rawBal: string = String(isUsdt ? u.usdtBalance : u.usdcBalance);
+                const ts = isUsdt ? u.blacklistedAtUSDT : u.blacklistedAtUSDC;
+                const dstr = epochToYmd(ts);
+                if (!dstr) continue;
+                // normalize by 6 decimals and drop fractional
+                const whole = formatUnits(rawBal, 6);
+                const prev = dateToTotal.get(dstr) ?? 0;
+                dateToTotal.set(dstr, prev + Number(whole));
+            }
+            offset += arr.length;
+            if (arr.length < pageSize) break;
+        }
+        // Build cumulative series in date order
+        const keys = Array.from(dateToTotal.keys()).sort((a, b) => {
+            const [ad, am, ay] = a.split('-').map(Number);
+            const [bd, bm, by] = b.split('-').map(Number);
+            const adate = new Date(ay, am - 1, ad).getTime();
+            const bdate = new Date(by, bm - 1, bd).getTime();
+            return adate - bdate;
+        });
+        const series: SeriesPoint[] = [];
+        let running = 0;
+        for (const k of keys) {
+            running += dateToTotal.get(k) ?? 0;
+            series.push({ date: k, value: running });
+        }
+        return series;
+    };
+    const [usdt, usdc] = await Promise.all([build('usdt'), build('usdc')]);
+    return { usdt, usdc };
+}
+
+export async function fetchSnapshotSeries(pageSize = 1000): Promise<{ usdt: SeriesPoint[]; usdc: SeriesPoint[] }> {
+    const endpoint = getEndpoint();
+    const query = `#graphql
+query Page($limit:Int!,$offset:Int!){
+  BlacklistSnapshot(order_by:{timestamp:asc}, limit:$limit, offset:$offset){
+    timestamp
+    totalBlacklistedUSDTDollarAmount
+    totalBlacklistedUSDCDollarAmount
+  }
+}`;
+    const points: Array<{ date: string; usdt: number; usdc: number }> = [];
+    let offset = 0;
+    for (; ;) {
+        const resp = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, variables: { limit: pageSize, offset } }),
+            cache: 'no-store',
+        });
+        if (!resp.ok) throw new Error(`GraphQL error ${resp.status}`);
+        const json = await resp.json();
+        const arr: Array<any> = json.data.BlacklistSnapshot ?? [];
+        if (arr.length === 0) break;
+        for (const s of arr) {
+            const date = epochToYmd(s.timestamp);
+            if (!date) continue;
+            const usdtWhole = Number(formatUnits(String(s.totalBlacklistedUSDTDollarAmount ?? '0'), 6));
+            const usdcWhole = Number(formatUnits(String(s.totalBlacklistedUSDCDollarAmount ?? '0'), 6));
+            points.push({ date, usdt: usdtWhole, usdc: usdcWhole });
+        }
+        offset += arr.length;
+        if (arr.length < pageSize) break;
+    }
+    const usdt: SeriesPoint[] = points.map(p => ({ date: p.date, value: p.usdt }));
+    const usdc: SeriesPoint[] = points.map(p => ({ date: p.date, value: p.usdc }));
+    return { usdt, usdc };
 }
 
 

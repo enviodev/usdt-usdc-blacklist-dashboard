@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { TerminalTable, Row as TableRow } from './TerminalTable';
+import CumulativeChart from './CumulativeChart';
+import { fetchSnapshotSeries } from '../lib/hasura';
 
 type Stats = {
     totalBlacklistedUSDT: number;
@@ -26,8 +28,9 @@ function formatCommas(numericString: string): string {
     return sign + withCommas;
 }
 
-export default function PageContent({ selectedTab, data, currentPage, sort, sortBy = 'balance' }: Props) {
+export default async function PageContent({ selectedTab, data, currentPage, sort, sortBy = 'balance' }: Props) {
     const isUSDT = selectedTab === 'usdt';
+    const series = await fetchSnapshotSeries(1000);
     const pageHref = (page: number) => `${isUSDT ? '/USDT' : '/USDC'}?page=${page}&sort=${sort}${sortBy ? `&sortBy=${sortBy}` : ''}`;
     const sortHref = (nextSort: 'asc' | 'desc') => `${isUSDT ? '/USDT' : '/USDC'}?page=1&sort=${nextSort}`;
     return (
@@ -84,6 +87,9 @@ export default function PageContent({ selectedTab, data, currentPage, sort, sort
                         </tr>
                     </tbody>
                 </table>
+            </section>
+            <section className="p-2 md:p-3">
+                <CumulativeChart usdt={series.usdt} usdc={series.usdc} />
             </section>
 
             <section className="p-2 md:p-3">
