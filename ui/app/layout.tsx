@@ -5,7 +5,7 @@ export const metadata: Metadata = {
     title: 'the list',
     description: 'USDT & USDC blacklist dashboard',
     icons: {
-        icon: '/favicon.ico',
+        icon: '/favicon.png',
     },
 };
 
