@@ -66,9 +66,9 @@ function formatEpochToDateString(epochSecondsLike: string | number | undefined):
     if (!Number.isFinite(sec)) return '';
     const d = new Date(sec * 1000);
     const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const mmm = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()];
     const yyyy = String(d.getFullYear());
-    return `${dd}-${mm}-${yyyy}`;
+    return `${dd}-${mmm}-${yyyy}`;
 }
 
 function epochToYmd(epochSecondsLike: string | number | undefined): string | undefined {
@@ -77,9 +77,9 @@ function epochToYmd(epochSecondsLike: string | number | undefined): string | und
     if (!Number.isFinite(sec)) return undefined;
     const d = new Date(sec * 1000);
     const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const mmm = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()];
     const yyyy = String(d.getFullYear());
-    return `${dd}-${mm}-${yyyy}`;
+    return `${dd}-${mmm}-${yyyy}`;
 }
 
 export async function fetchBlacklistData(opts?: {
@@ -131,8 +131,6 @@ export async function fetchBlacklistData(opts?: {
             totalBlacklistedUSDTDollarAmount: formatUnits(String(g?.totalBlacklistedUSDTDollarAmount ?? '0'), 6),
         };
 
-        console.log('[fetchBlacklistData] GlobalStats_by_pk', g);
-        console.log('[fetchBlacklistData] computed stats', stats);
 
         const usdt: Row[] = (json.data.User as Array<{ id: string; usdtBalance: string; blacklistedAtUSDT?: string }>)?.map((u, i) => {
             const raw = u.usdtBalance;

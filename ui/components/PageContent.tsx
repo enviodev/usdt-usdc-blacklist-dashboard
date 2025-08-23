@@ -12,7 +12,7 @@ type Stats = {
 };
 
 type Props = {
-    selectedTab: 'usdt' | 'usdc';
+    selectedTab: 'usdt' | 'usdc' | 'graph';
     data: { stats: Stats; usdt: TableRow[]; usdc: TableRow[]; pageCountUsdt: number; pageCountUsdc: number };
     currentPage: number;
     sort: 'asc' | 'desc';
@@ -30,6 +30,7 @@ function formatCommas(numericString: string): string {
 
 export default async function PageContent({ selectedTab, data, currentPage, sort, sortBy = 'balance' }: Props) {
     const isUSDT = selectedTab === 'usdt';
+    const isGraph = selectedTab === 'graph';
     const series = await fetchSnapshotSeries(1000);
     const pageHref = (page: number) => `${isUSDT ? '/USDT' : '/USDC'}?page=${page}&sort=${sort}${sortBy ? `&sortBy=${sortBy}` : ''}`;
     const sortHref = (nextSort: 'asc' | 'desc') => `${isUSDT ? '/USDT' : '/USDC'}?page=1&sort=${nextSort}`;
@@ -88,26 +89,36 @@ export default async function PageContent({ selectedTab, data, currentPage, sort
                     </tbody>
                 </table>
             </section>
-            <section className="p-2 md:p-3">
-                <CumulativeChart usdt={series.usdt} usdc={series.usdc} />
-            </section>
+            {false && (
+                <section className="p-2 md:p-3">
+                    <CumulativeChart usdt={series.usdt} usdc={series.usdc} />
+                </section>
+            )}
 
             <section className="p-2 md:p-3">
                 <div className="mb-1 flex gap-2">
                     <Link
                         href="/USDT"
-                        className={`${isUSDT ? 'bg-white text-terminal-bg' : 'text-terminal-text'} border-t border-l border-r border-white px-3 py-1 -mb-px`}
+                        className={`${selectedTab === 'usdt' ? 'bg-white text-terminal-bg' : 'text-terminal-text'} border-t border-l border-r border-white px-3 py-1 -mb-px`}
                     >
                         -usdt-
                     </Link>
                     <Link
                         href="/USDC"
-                        className={`${!isUSDT ? 'bg-white text-terminal-bg' : 'text-terminal-text'} border-t border-l border-r border-white px-3 py-1 -mb-px`}
+                        className={`${selectedTab === 'usdc' ? 'bg-white text-terminal-bg' : 'text-terminal-text'} border-t border-l border-r border-white px-3 py-1 -mb-px`}
                     >
                         -usdc-
                     </Link>
+                    <Link
+                        href="/GRAPH"
+                        className={`${selectedTab === 'graph' ? 'bg-white text-terminal-bg' : 'text-terminal-text'} border-t border-l border-r border-white px-3 py-1 -mb-px`}
+                    >
+                        -graph-
+                    </Link>
                 </div>
-                {isUSDT ? (
+                {isGraph ? (
+                    <CumulativeChart usdt={series.usdt} usdc={series.usdc} />
+                ) : isUSDT ? (
                     <TerminalTable rows={data.usdt} currentPage={currentPage} pageCount={data.pageCountUsdt} pageHref={pageHref} sort={sort} sortHref={sortHref} dateSortHref={(next) => `/USDT?page=1&sort=${next}&sortBy=date`} />
                 ) : (
                     <TerminalTable rows={data.usdc} currentPage={currentPage} pageCount={data.pageCountUsdc} pageHref={pageHref} sort={sort} sortHref={sortHref} dateSortHref={(next) => `/USDC?page=1&sort=${next}&sortBy=date`} />
