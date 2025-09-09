@@ -47,18 +47,24 @@ export function TerminalTable({
                         </tr>
                     </thead>
                     <tbody>
-                        {rows.map((r) => (
-                            <tr key={r.index} className="divide-x divide-white">
-                                <td className="py-1 px-2 text-terminal-dim ">{r.index}</td>
-                                <td className="py-1 px-2 text-terminal-accent w-[26ch] max-w-[26ch] truncate">
-                                    <Link href={`https://etherscan.io/address/${r.account}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-80">
-                                        {r.account}
-                                    </Link>
-                                </td>
-                                <td className="py-1 px-2 text-terminal-blue">{r.timestamp ?? ''}</td>
-                                <td className="py-1 px-2 text-terminal-warning">{r.balance != undefined ? "$" + r.balance : ""}</td>
+                        {rows.length === 0 ? (
+                            <tr>
+                                <td className="py-2 px-2 text-terminal-text" colSpan={4}>no blacklisted addresses</td>
                             </tr>
-                        ))}
+                        ) : (
+                            rows.map((r) => (
+                                <tr key={r.index} className="divide-x divide-white">
+                                    <td className="py-1 px-2 text-terminal-dim ">{r.index}</td>
+                                    <td className="py-1 px-2 text-terminal-accent w-[26ch] max-w-[26ch] truncate">
+                                        <Link href={`https://etherscan.io/address/${r.account}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-80">
+                                            {r.account}
+                                        </Link>
+                                    </td>
+                                    <td className="py-1 px-2 text-terminal-blue">{r.timestamp ?? ''}</td>
+                                    <td className="py-1 px-2 text-terminal-warning">{r.balance != undefined ? "$" + r.balance : ""}</td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

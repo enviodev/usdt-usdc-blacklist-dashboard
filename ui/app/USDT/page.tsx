@@ -6,7 +6,7 @@ export default async function USDTTabPage({ searchParams }: { searchParams?: { p
     const page = Math.max(1, Number(searchParams?.page ?? '1')) || 1;
     const sort = (searchParams?.sort === 'asc' || searchParams?.sort === 'desc') ? searchParams?.sort : 'desc';
     const sortBy = searchParams?.sortBy === 'date' ? 'date' : 'balance';
-    const data = await fetchBlacklistData({ pageUsdt: page, pageUsdc: 1, pageSize: 20, sortUsdt: sort as 'asc' | 'desc', sortUsdc: 'desc', sortByUsdt: sortBy });
+    const data = await fetchBlacklistData({ pageUsdt: page, pageUsdc: 1, pageUsd1: 1, pageRlusd: 1, pageSize: 20, sortUsdt: sort as 'asc' | 'desc', sortUsdc: 'desc', sortUsd1: 'desc', sortRlusd: 'desc', sortByUsdt: sortBy });
     const totalPages = data.pageCountUsdt;
     if (page > totalPages) {
         redirect(`/USDT?page=${totalPages}&sort=${sort}`);
