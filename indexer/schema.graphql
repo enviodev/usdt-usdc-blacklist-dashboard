@@ -2,10 +2,16 @@ type User {
   id: ID!
   isBlacklistedByUSDT: Boolean!
   isBlacklistedByUSDC: Boolean!
+  isBlacklistedByUSD1: Boolean!
+  isBlacklistedByRLUSD: Boolean!
   usdtBalance: BigInt!
   usdcBalance: BigInt!
+  usd1Balance: BigInt!
+  rlusdBalance: BigInt!
   blacklistedAtUSDT: BigInt
   blacklistedAtUSDC: BigInt
+  blacklistedAtUSD1: BigInt
+  blacklistedAtRLUSD: BigInt
 }
 
 # Singleton; use id = "GLOBAL"
@@ -14,13 +20,21 @@ type GlobalStats {
   totalUsers: BigInt!
   totalBlacklistedUSDT: BigInt!
   totalBlacklistedUSDC: BigInt!
+  totalBlacklistedUSD1: BigInt!
+  totalBlacklistedRLUSD: BigInt!
   totalBlacklistEventsUSDT: BigInt!
   totalUnblacklistEventsUSDT: BigInt!
   totalBlacklistEventsUSDC: BigInt!
   totalUnblacklistEventsUSDC: BigInt!
+  totalBlacklistEventsUSD1: BigInt!
+  totalUnblacklistEventsUSD1: BigInt!
+  totalBlacklistEventsRLUSD: BigInt!
+  totalUnblacklistEventsRLUSD: BigInt!
   totalDestroyedBlackFundsUSDT: BigInt!
   totalBlacklistedUSDTDollarAmount: BigInt!
   totalBlacklistedUSDCDollarAmount: BigInt!
+  totalBlacklistedUSD1DollarAmount: BigInt!
+  totalBlacklistedRLUSDDollarAmount: BigInt!
 }
 
 # Snapshot of aggregate totals at a specific block/time, recorded on every
@@ -31,6 +45,10 @@ type BlacklistSnapshot {
   timestamp: BigInt!
   totalBlacklistedUSDT: BigInt!
   totalBlacklistedUSDC: BigInt!
+  totalBlacklistedUSD1: BigInt!
+  totalBlacklistedRLUSD: BigInt!
   totalBlacklistedUSDTDollarAmount: BigInt!
   totalBlacklistedUSDCDollarAmount: BigInt!
+  totalBlacklistedUSD1DollarAmount: BigInt!
+  totalBlacklistedRLUSDDollarAmount: BigInt!
 }
