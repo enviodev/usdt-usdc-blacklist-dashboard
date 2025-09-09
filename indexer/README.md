@@ -53,7 +53,7 @@ This indexer tracks Tether (USDT) and Circle (USDC) blacklist events and maintai
 - Set an Ethereum RPC endpoint for `viem`:
 
 ```bash
-export RPC_URL="https://your-mainnet-rpc"
+export ENVIO_RPC_URL="https://your-mainnet-rpc"
 ```
 
 > If self-hosting with HyperSync at scale, you may also set `ENVIO_API_TOKEN` as per the docs.

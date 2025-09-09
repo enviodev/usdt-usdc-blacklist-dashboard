@@ -40,7 +40,7 @@ function requireEnv(name) {
   return v;
 }
 
-const rpcUrl = requireEnv("RPC_URL");
+const rpcUrl = requireEnv("ENVIO_RPC_URL");
 
 const publicClient = createPublicClient({
   chain: mainnet,
