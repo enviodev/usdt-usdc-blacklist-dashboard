@@ -19,5 +19,19 @@ networks:
         events:
           - event: Blacklisted(address indexed _account)
           - event: UnBlacklisted(address indexed _account)
+      - name: USD1
+        address:
+          - 0x3398385c205C060ef54744ee817c1487e28A6616
+        handler: src/EventHandlers.ts
+        events:
+          - event: Freeze(address indexed caller, address indexed account)
+          - event: Unfreeze(address indexed caller, address indexed account)
+      - name: RLUSD
+        address:
+          - 0x8292bb45bf1ee4d140127049757c2e0ff06317ed
+        handler: src/EventHandlers.ts
+        events:
+          - event: AccountPaused(address account)
+          - event: AccountUnpaused(address account)
 unordered_multichain_mode: true
 preload_handlers: true

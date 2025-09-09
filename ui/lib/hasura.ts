@@ -1,9 +1,13 @@
 type Stats = {
     totalBlacklistedUSDT: number;
     totalBlacklistedUSDC: number;
+    totalBlacklistedUSD1?: number;
+    totalBlacklistedRLUSD?: number;
     totalDestroyedBlackFundsUSDT: string;
     totalBlacklistedUSDCDollarAmount?: string;
     totalBlacklistedUSDTDollarAmount?: string;
+    totalBlacklistedUSD1DollarAmount?: string;
+    totalBlacklistedRLUSDDollarAmount?: string;
 };
 
 export type Row = { index: number; account: string; balance?: string; balanceRaw?: string; timestamp?: string };
@@ -14,15 +18,23 @@ query TheListData(
   $limit: Int!
   $offsetUsdt: Int!
   $offsetUsdc: Int!
+  $offsetUsd1: Int!
+  $offsetRlusd: Int!
   $orderByUsdt: [User_order_by!]
   $orderByUsdc: [User_order_by!]
+  $orderByUsd1: [User_order_by!]
+  $orderByRlusd: [User_order_by!]
 ) {
   GlobalStats_by_pk(id: "GLOBAL") {
     totalBlacklistedUSDT
     totalBlacklistedUSDC
+    totalBlacklistedUSD1
+    totalBlacklistedRLUSD
     totalDestroyedBlackFundsUSDT
     totalBlacklistedUSDCDollarAmount
     totalBlacklistedUSDTDollarAmount
+    totalBlacklistedUSD1DollarAmount
+    totalBlacklistedRLUSDDollarAmount
   }
   User(where: {isBlacklistedByUSDT: {_eq: true}}, limit: $limit, offset: $offsetUsdt, order_by: $orderByUsdt) {
     id
@@ -33,6 +45,16 @@ query TheListData(
     id
     usdcBalance
     blacklistedAtUSDC
+  }
+  User3: User(where: {isBlacklistedByUSD1: {_eq: true}}, limit: $limit, offset: $offsetUsd1, order_by: $orderByUsd1) {
+    id
+    usd1Balance
+    blacklistedAtUSD1
+  }
+  User4: User(where: {isBlacklistedByRLUSD: {_eq: true}}, limit: $limit, offset: $offsetRlusd, order_by: $orderByRlusd) {
+    id
+    rlusdBalance
+    blacklistedAtRLUSD
   }
 }`;
 
@@ -85,21 +107,33 @@ function epochToYmd(epochSecondsLike: string | number | undefined): string | und
 export async function fetchBlacklistData(opts?: {
     pageUsdt?: number;
     pageUsdc?: number;
+    pageUsd1?: number;
+    pageRlusd?: number;
     pageSize?: number;
     sortUsdt?: 'asc' | 'desc';
     sortUsdc?: 'asc' | 'desc';
+    sortUsd1?: 'asc' | 'desc';
+    sortRlusd?: 'asc' | 'desc';
     sortByUsdt?: 'balance' | 'date';
     sortByUsdc?: 'balance' | 'date';
-}): Promise<{ stats: Stats; usdt: Row[]; usdc: Row[]; pageCountUsdt: number; pageCountUsdc: number; }> {
+    sortByUsd1?: 'balance' | 'date';
+    sortByRlusd?: 'balance' | 'date';
+}): Promise<{ stats: Stats; usdt: Row[]; usdc: Row[]; usd1: Row[]; rlusd: Row[]; pageCountUsdt: number; pageCountUsdc: number; pageCountUsd1: number; pageCountRlusd: number; }> {
     try {
         const endpoint = getEndpoint();
         const pageSize = Math.max(1, Math.min(200, opts?.pageSize ?? 20));
         const pageUsdt = Math.max(1, opts?.pageUsdt ?? 1);
         const pageUsdc = Math.max(1, opts?.pageUsdc ?? 1);
+        const pageUsd1 = Math.max(1, opts?.pageUsd1 ?? 1);
+        const pageRlusd = Math.max(1, opts?.pageRlusd ?? 1);
         const sortUsdt = opts?.sortUsdt ?? 'desc';
         const sortUsdc = opts?.sortUsdc ?? 'desc';
+        const sortUsd1 = opts?.sortUsd1 ?? 'desc';
+        const sortRlusd = opts?.sortRlusd ?? 'desc';
         const sortByUsdt = opts?.sortByUsdt ?? 'balance';
         const sortByUsdc = opts?.sortByUsdc ?? 'balance';
+        const sortByUsd1 = opts?.sortByUsd1 ?? 'balance';
+        const sortByRlusd = opts?.sortByRlusd ?? 'balance';
         const resp = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -111,8 +145,12 @@ export async function fetchBlacklistData(opts?: {
                     limit: pageSize,
                     offsetUsdt: (pageUsdt - 1) * pageSize,
                     offsetUsdc: (pageUsdc - 1) * pageSize,
+                    offsetUsd1: (pageUsd1 - 1) * pageSize,
+                    offsetRlusd: (pageRlusd - 1) * pageSize,
                     orderByUsdt: sortByUsdt === 'date' ? [{ blacklistedAtUSDT: sortUsdt }] : [{ usdtBalance: sortUsdt }],
                     orderByUsdc: sortByUsdc === 'date' ? [{ blacklistedAtUSDC: sortUsdc }] : [{ usdcBalance: sortUsdc }],
+                    orderByUsd1: sortByUsd1 === 'date' ? [{ blacklistedAtUSD1: sortUsd1 }] : [{ usd1Balance: sortUsd1 }],
+                    orderByRlusd: sortByRlusd === 'date' ? [{ blacklistedAtRLUSD: sortRlusd }] : [{ rlusdBalance: sortRlusd }],
                 },
             }),
             cache: 'no-store',
@@ -126,9 +164,13 @@ export async function fetchBlacklistData(opts?: {
         const stats: Stats = {
             totalBlacklistedUSDT: Number(g?.totalBlacklistedUSDT ?? 0),
             totalBlacklistedUSDC: Number(g?.totalBlacklistedUSDC ?? 0),
+            totalBlacklistedUSD1: Number(g?.totalBlacklistedUSD1 ?? 0),
+            totalBlacklistedRLUSD: Number(g?.totalBlacklistedRLUSD ?? 0),
             totalDestroyedBlackFundsUSDT: String(g?.totalDestroyedBlackFundsUSDT ?? '0'),
             totalBlacklistedUSDCDollarAmount: formatUnits(String(g?.totalBlacklistedUSDCDollarAmount ?? '0'), 6),
             totalBlacklistedUSDTDollarAmount: formatUnits(String(g?.totalBlacklistedUSDTDollarAmount ?? '0'), 6),
+            totalBlacklistedUSD1DollarAmount: formatUnits(String(g?.totalBlacklistedUSD1DollarAmount ?? '0'), 6),
+            totalBlacklistedRLUSDDollarAmount: formatUnits(String(g?.totalBlacklistedRLUSDDollarAmount ?? '0'), 6),
         };
 
 
@@ -154,10 +196,34 @@ export async function fetchBlacklistData(opts?: {
                 timestamp: formatEpochToDateString(u.blacklistedAtUSDC),
             };
         }) ?? [];
+        const usd1: Row[] = (json.data.User3 as Array<{ id: string; usd1Balance: string; blacklistedAtUSD1?: string }>)?.map((u, i) => {
+            const raw = u.usd1Balance;
+            const whole = formatUnits(raw, 6);
+            return {
+                index: i + (pageUsd1 - 1) * pageSize,
+                account: u.id,
+                balance: formatWithCommas(whole),
+                balanceRaw: whole,
+                timestamp: formatEpochToDateString(u.blacklistedAtUSD1),
+            };
+        }) ?? [];
+        const rlusd: Row[] = (json.data.User4 as Array<{ id: string; rlusdBalance: string; blacklistedAtRLUSD?: string }>)?.map((u, i) => {
+            const raw = u.rlusdBalance;
+            const whole = formatUnits(raw, 6);
+            return {
+                index: i + (pageRlusd - 1) * pageSize,
+                account: u.id,
+                balance: formatWithCommas(whole),
+                balanceRaw: whole,
+                timestamp: formatEpochToDateString(u.blacklistedAtRLUSD),
+            };
+        }) ?? [];
         const pageCountUsdt = Math.max(1, Math.ceil(stats.totalBlacklistedUSDT / pageSize));
         const pageCountUsdc = Math.max(1, Math.ceil(stats.totalBlacklistedUSDC / pageSize));
+        const pageCountUsd1 = Math.max(1, Math.ceil((stats.totalBlacklistedUSD1 ?? 0) / pageSize));
+        const pageCountRlusd = Math.max(1, Math.ceil((stats.totalBlacklistedRLUSD ?? 0) / pageSize));
 
-        return { stats, usdt, usdc, pageCountUsdt, pageCountUsdc };
+        return { stats, usdt, usdc, usd1, rlusd, pageCountUsdt, pageCountUsdc, pageCountUsd1, pageCountRlusd };
     } catch (err) {
         console.error('fetchBlacklistData error', err);
         const empty: Stats = {
@@ -165,12 +231,12 @@ export async function fetchBlacklistData(opts?: {
             totalBlacklistedUSDC: 0,
             totalDestroyedBlackFundsUSDT: '0',
         };
-        return { stats: empty, usdt: [], usdc: [], pageCountUsdt: 1, pageCountUsdc: 1 };
+        return { stats: empty, usdt: [], usdc: [], usd1: [], rlusd: [], pageCountUsdt: 1, pageCountUsdc: 1, pageCountUsd1: 1, pageCountRlusd: 1 };
     }
 }
 
 // Build daily cumulative series for USDT/USDC balances based on blacklist timestamps
-export async function fetchCumulativeSeries(pageSize = 500): Promise<{ usdt: SeriesPoint[]; usdc: SeriesPoint[] }> {
+export async function fetchCumulativeSeries(pageSize = 500): Promise<{ usdt: SeriesPoint[]; usdc: SeriesPoint[]; usd1: SeriesPoint[]; rlusd: SeriesPoint[] }> {
     const endpoint = getEndpoint();
     const build = async (which: 'usdt' | 'usdc') => {
         const isUsdt = which === 'usdt';
@@ -218,10 +284,11 @@ export async function fetchCumulativeSeries(pageSize = 500): Promise<{ usdt: Ser
         return series;
     };
     const [usdt, usdc] = await Promise.all([build('usdt'), build('usdc')]);
-    return { usdt, usdc };
+    // For USD1 / RLUSD, cumulative-by-user approach omitted for performance; prefer snapshot series below
+    return { usdt, usdc, usd1: [], rlusd: [] };
 }
 
-export async function fetchSnapshotSeries(pageSize = 1000): Promise<{ usdt: SeriesPoint[]; usdc: SeriesPoint[] }> {
+export async function fetchSnapshotSeries(pageSize = 1000): Promise<{ usdt: SeriesPoint[]; usdc: SeriesPoint[]; usd1: SeriesPoint[]; rlusd: SeriesPoint[] }> {
     const endpoint = getEndpoint();
     const query = `#graphql
 query Page($limit:Int!,$offset:Int!){
@@ -229,9 +296,11 @@ query Page($limit:Int!,$offset:Int!){
     timestamp
     totalBlacklistedUSDTDollarAmount
     totalBlacklistedUSDCDollarAmount
+    totalBlacklistedUSD1DollarAmount
+    totalBlacklistedRLUSDDollarAmount
   }
 }`;
-    const points: Array<{ date: string; usdt: number; usdc: number }> = [];
+    const points: Array<{ date: string; usdt: number; usdc: number; usd1: number; rlusd: number }> = [];
     let offset = 0;
     for (; ;) {
         const resp = await fetch(endpoint, {
@@ -249,14 +318,18 @@ query Page($limit:Int!,$offset:Int!){
             if (!date) continue;
             const usdtWhole = Number(formatUnits(String(s.totalBlacklistedUSDTDollarAmount ?? '0'), 6));
             const usdcWhole = Number(formatUnits(String(s.totalBlacklistedUSDCDollarAmount ?? '0'), 6));
-            points.push({ date, usdt: usdtWhole, usdc: usdcWhole });
+            const usd1Whole = Number(formatUnits(String(s.totalBlacklistedUSD1DollarAmount ?? '0'), 6));
+            const rlusdWhole = Number(formatUnits(String(s.totalBlacklistedRLUSDDollarAmount ?? '0'), 6));
+            points.push({ date, usdt: usdtWhole, usdc: usdcWhole, usd1: usd1Whole, rlusd: rlusdWhole });
         }
         offset += arr.length;
         if (arr.length < pageSize) break;
     }
     const usdt: SeriesPoint[] = points.map(p => ({ date: p.date, value: p.usdt }));
     const usdc: SeriesPoint[] = points.map(p => ({ date: p.date, value: p.usdc }));
-    return { usdt, usdc };
+    const usd1: SeriesPoint[] = points.map(p => ({ date: p.date, value: p.usd1 }));
+    const rlusd: SeriesPoint[] = points.map(p => ({ date: p.date, value: p.rlusd }));
+    return { usdt, usdc, usd1, rlusd };
 }
 
 

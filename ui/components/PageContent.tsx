@@ -6,14 +6,18 @@ import { fetchSnapshotSeries } from '../lib/hasura';
 type Stats = {
     totalBlacklistedUSDT: number;
     totalBlacklistedUSDC: number;
+    totalBlacklistedUSD1?: number;
+    totalBlacklistedRLUSD?: number;
     totalDestroyedBlackFundsUSDT: string;
     totalBlacklistedUSDCDollarAmount?: string;
     totalBlacklistedUSDTDollarAmount?: string;
+    totalBlacklistedUSD1DollarAmount?: string;
+    totalBlacklistedRLUSDDollarAmount?: string;
 };
 
 type Props = {
-    selectedTab: 'usdt' | 'usdc' | 'graph';
-    data: { stats: Stats; usdt: TableRow[]; usdc: TableRow[]; pageCountUsdt: number; pageCountUsdc: number };
+    selectedTab: 'usdt' | 'usdc' | 'usd1' | 'rlusd' | 'graph';
+    data: { stats: Stats; usdt: TableRow[]; usdc: TableRow[]; usd1: TableRow[]; rlusd: TableRow[]; pageCountUsdt: number; pageCountUsdc: number; pageCountUsd1: number; pageCountRlusd: number };
     currentPage: number;
     sort: 'asc' | 'desc';
     sortBy?: 'balance' | 'date';
@@ -30,17 +34,20 @@ function formatCommas(numericString: string): string {
 
 export default async function PageContent({ selectedTab, data, currentPage, sort, sortBy = 'balance' }: Props) {
     const isUSDT = selectedTab === 'usdt';
+    const isUSDC = selectedTab === 'usdc';
+    const isUSD1 = selectedTab === 'usd1';
+    const isRLUSD = selectedTab === 'rlusd';
     const isGraph = selectedTab === 'graph';
     const series = await fetchSnapshotSeries(1000);
-    const pageHref = (page: number) => `${isUSDT ? '/USDT' : '/USDC'}?page=${page}&sort=${sort}${sortBy ? `&sortBy=${sortBy}` : ''}`;
-    const sortHref = (nextSort: 'asc' | 'desc') => `${isUSDT ? '/USDT' : '/USDC'}?page=1&sort=${nextSort}`;
+    const pageHref = (page: number) => `${isUSDT ? '/USDT' : isUSDC ? '/USDC' : isUSD1 ? '/USD1' : '/RLUSD'}?page=${page}&sort=${sort}${sortBy ? `&sortBy=${sortBy}` : ''}`;
+    const sortHref = (nextSort: 'asc' | 'desc') => `${isUSDT ? '/USDT' : isUSDC ? '/USDC' : isUSD1 ? '/USD1' : '/RLUSD'}?page=1&sort=${nextSort}`;
     return (
         <main className="mx-auto max-w-4xl p-2 md:p-6 space-y-1 font-mono">
             <header className="p-2 md:p-3">
                 <div className="flex items-center justify-between">
                     <h1 className="terminal-title text-xl md:text-2xl">the list</h1>
                     <div className="mt-1 flex items-center gap-2 text-terminal-text text-sm">
-                        <p>USDT & USDC blacklisted addresses</p>
+                        <p>USDT, USDC, USD1 & RLUSD blacklisted addresses</p>
                         <a
                             href="https://github.com/enviodev/usdt-usdc-blacklist-dashboard"
                             target="_blank"
@@ -77,12 +84,24 @@ export default async function PageContent({ selectedTab, data, currentPage, sort
                             <td className="py-1 px-2 text-terminal-value">${Number(data.stats.totalBlacklistedUSDCDollarAmount ?? '0').toLocaleString()}</td>
                         </tr>
                         <tr className="divide-x divide-white">
+                            <td className="py-1 px-2 text-terminal-dim">2</td>
+                            <td className="py-1 px-2 text-terminal-text">USD1 total</td>
+                            <td className="py-1 px-2 text-terminal-value">${Number(data.stats.totalBlacklistedUSD1DollarAmount ?? '0').toLocaleString()}</td>
+                        </tr>
+                        <tr className="divide-x divide-white">
+                            <td className="py-1 px-2 text-terminal-dim">3</td>
+                            <td className="py-1 px-2 text-terminal-text">RLUSD total</td>
+                            <td className="py-1 px-2 text-terminal-value">${Number(data.stats.totalBlacklistedRLUSDDollarAmount ?? '0').toLocaleString()}</td>
+                        </tr>
+                        <tr className="divide-x divide-white">
                             <td className="py-1 px-2 text-terminal-dim"></td>
                             <td className="py-1 px-2 text-terminal-text w-[50%]"></td>
                             <td className="py-1 px-2 text-terminal-value border-t border-white">${
                                 (
                                     Number(data.stats.totalBlacklistedUSDTDollarAmount ?? '0') +
-                                    Number(data.stats.totalBlacklistedUSDCDollarAmount ?? '0')
+                                    Number(data.stats.totalBlacklistedUSDCDollarAmount ?? '0') +
+                                    Number(data.stats.totalBlacklistedUSD1DollarAmount ?? '0') +
+                                    Number(data.stats.totalBlacklistedRLUSDDollarAmount ?? '0')
                                 ).toLocaleString()
                             }</td>
                         </tr>
@@ -110,6 +129,18 @@ export default async function PageContent({ selectedTab, data, currentPage, sort
                         -usdc-
                     </Link>
                     <Link
+                        href="/USD1"
+                        className={`${selectedTab === 'usd1' ? 'bg-white text-terminal-bg' : 'text-terminal-text'} border-t border-l border-r border-white px-3 py-1 -mb-px`}
+                    >
+                        -usd1-
+                    </Link>
+                    <Link
+                        href="/RLUSD"
+                        className={`${selectedTab === 'rlusd' ? 'bg-white text-terminal-bg' : 'text-terminal-text'} border-t border-l border-r border-white px-3 py-1 -mb-px`}
+                    >
+                        -rlusd-
+                    </Link>
+                    <Link
                         href="/GRAPH"
                         className={`${selectedTab === 'graph' ? 'bg-white text-terminal-bg' : 'text-terminal-text'} border-t border-l border-r border-white px-3 py-1 -mb-px`}
                     >
@@ -117,11 +148,15 @@ export default async function PageContent({ selectedTab, data, currentPage, sort
                     </Link>
                 </div>
                 {isGraph ? (
-                    <CumulativeChart usdt={series.usdt} usdc={series.usdc} />
+                    <CumulativeChart usdt={series.usdt} usdc={series.usdc} usd1={series.usd1} rlusd={series.rlusd} />
                 ) : isUSDT ? (
                     <TerminalTable rows={data.usdt} currentPage={currentPage} pageCount={data.pageCountUsdt} pageHref={pageHref} sort={sort} sortHref={sortHref} dateSortHref={(next) => `/USDT?page=1&sort=${next}&sortBy=date`} />
-                ) : (
+                ) : isUSDC ? (
                     <TerminalTable rows={data.usdc} currentPage={currentPage} pageCount={data.pageCountUsdc} pageHref={pageHref} sort={sort} sortHref={sortHref} dateSortHref={(next) => `/USDC?page=1&sort=${next}&sortBy=date`} />
+                ) : isUSD1 ? (
+                    <TerminalTable rows={data.usd1} currentPage={currentPage} pageCount={data.pageCountUsd1} pageHref={pageHref} sort={sort} sortHref={sortHref} dateSortHref={(next) => `/USD1?page=1&sort=${next}&sortBy=date`} />
+                ) : (
+                    <TerminalTable rows={data.rlusd} currentPage={currentPage} pageCount={data.pageCountRlusd} pageHref={pageHref} sort={sort} sortHref={sortHref} dateSortHref={(next) => `/RLUSD?page=1&sort=${next}&sortBy=date`} />
                 )}
             </section>
             <footer className="p-2 text-center text-xs text-terminal-text">
