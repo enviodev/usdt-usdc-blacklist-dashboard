@@ -44,7 +44,7 @@ TUI_OFF=true pnpm dev
 
 Environment variables:
 
-- `RPC_URL` — HTTPS mainnet RPC for viem (used by Effect API)
+- `ENVIO_RPC_URL` — HTTPS mainnet RPC for viem (used by Effect API)
 
 Documentation: see HyperIndex Complete Documentation: https://docs.envio.dev/docs/HyperIndex-LLM/hyperindex-complete
 

@@ -16,7 +16,7 @@ export const getERC20Balance = experimental_createEffect(
 
         const client = createPublicClient({
             chain: mainnet,
-            transport: http((process.env.RPC_URL || undefined), { batch: true }),
+            transport: http((process.env.ENVIO_RPC_URL || undefined), { batch: true }),
         });
 
         const erc20Abi = [
